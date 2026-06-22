@@ -1,0 +1,19 @@
+{
+  "name": "rcm-ear-test-hub",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "prepare:approved": "node scripts/copy-approved-audio.mjs",
+    "dev": "node scripts/copy-approved-audio.mjs && vite",
+    "build": "node scripts/copy-approved-audio.mjs && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,28 @@
+node_modules/
+dist/
+.netlify/
+
+__pycache__/
+**/__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.streamlit/
+streamlit-old/
+netlify-app/
+*.log
+.DS_Store
+
+# Local Streamlit prototype files live here only for Jane's local reference.
+# They should not be committed to the clean Netlify frontend repo.
+app.py
+streamlit_app.py
+requirements.txt
+rcm_ear_training/
+static/
+tests/
+.devcontainer/
+
+# Stale local draft component; the active app uses GeneratedActivities.jsx.
+src/components/ExerciseActivities.jsx
