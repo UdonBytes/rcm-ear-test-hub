@@ -85,9 +85,11 @@ function TwoStepChord({ question, onNext }) {
   const next = () => { onNext(); setQualitySelected(null); setToneSelected(null) }
 
   return <>
-    <PlayButton onClick={() => playChordQuality(question)} label="Play" />
-    <p className="prompt">Which chord did you hear?</p>
-    <Choices choices={question.choices} answer={question.answer} selected={qualitySelected} onChoose={chooseQuality} className="chord-choices" />
+    <section className="chord-first-section">
+      <PlayButton onClick={() => playChordQuality(question)} label="Play" />
+      <p className="prompt">Which chord did you hear?</p>
+      <Choices choices={question.choices} answer={question.answer} selected={qualitySelected} onChoose={chooseQuality} className="chord-choices" />
+    </section>
     <Feedback selected={qualitySelected} answer={question.answer} />
     {qualitySelected && <section className="chord-tone-section">
       <p className="tone-kicker">Now listen for one chord tone.</p>
