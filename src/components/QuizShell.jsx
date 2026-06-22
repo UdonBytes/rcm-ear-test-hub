@@ -1,8 +1,10 @@
 export default function QuizShell({ icon, title, subtitle, onBack, children }) {
-  return <main className="practice-wrap">
+  const titleClass = title.includes('/') ? 'long-title' : ''
+  const activityClass = title === 'Chords' ? 'chord-practice' : ''
+  return <main className={`practice-wrap ${activityClass}`.trim()}>
     <button className="back-button" onClick={onBack}>← All activities</button>
     <section className="practice-card">
-      <div className="practice-heading"><span className="big-icon">{icon}</span><div><p className="eyebrow">Your listening studio</p><h1>{title}</h1><p>{subtitle}</p></div></div>
+      <div className="practice-heading"><span className="big-icon">{icon}</span><div><p className="eyebrow">Your listening studio</p><h1 className={titleClass}>{title}</h1><p>{subtitle}</p></div></div>
       {children}
     </section>
   </main>
@@ -24,6 +26,6 @@ export function Feedback({ selected, answer, onNext, nextLabel = 'Next example' 
   const right = selected === answer
   return <div className={`feedback ${right ? 'yay' : 'try'}`} role="status">
     <div><strong>{right ? '✨ You got it!' : 'Almost! Keep listening.'}</strong><span>{right ? ' Lovely ears at work.' : ` The answer was ${answer}.`}</span></div>
-    <button onClick={onNext}>{nextLabel}</button>
+    {onNext && <button onClick={onNext}>{nextLabel}</button>}
   </div>
 }

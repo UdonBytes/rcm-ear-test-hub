@@ -9,8 +9,8 @@ export const chordFormulas = {
 export const rcmChordRules = {
   1: { qualities: ['Major triad', 'Minor triad'], playback: 'brokenThenSolid', identifyTone: false },
   2: { qualities: ['Major triad', 'Minor triad'], playback: 'solid', identifyTone: false },
-  3: { qualities: ['Major triad', 'Minor triad'], playback: 'solidThenTone', identifyTone: true, toneChoices: ['Root', 'Third', 'Fifth'] },
-  4: { qualities: ['Major triad', 'Minor triad'], playback: 'solidThenTone', identifyTone: true, toneChoices: ['Root', 'Third', 'Fifth'] },
+  3: { qualities: ['Major triad', 'Minor triad'], playback: 'solidThenTone', identifyTone: true, toneChoices: ['Root', '3rd', '5th'] },
+  4: { qualities: ['Major triad', 'Minor triad'], playback: 'solidThenTone', identifyTone: true, toneChoices: ['Root', '3rd', '5th'] },
   5: { qualities: ['Major triad', 'Minor triad', 'Dominant 7th'], playback: 'solid', identifyTone: false },
   6: { qualities: ['Major triad', 'Minor triad', 'Dominant 7th', 'Diminished 7th'], playback: 'solid', identifyTone: false },
   7: { qualities: ['Major triad', 'Minor triad', 'Dominant 7th', 'Diminished 7th', 'Augmented triad'], playback: 'solid', identifyTone: false },

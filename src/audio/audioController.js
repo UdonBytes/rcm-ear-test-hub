@@ -110,8 +110,9 @@ export function playChordQuality(question) {
 }
 
 export function playChordTone(question) {
+  const targetMidi = question.targetNote ?? question.toneMidi
   return playEvents([
     ...question.notes.slice(0, 3).map((note, index) => ({ notes: [note], at: index * 0.62, duration: 0.55, volume: 0.54 })),
-    { notes: [question.toneMidi], at: 2.15, duration: 1.0, volume: 0.58 },
+    { notes: [targetMidi], at: 2.15, duration: 1.0, volume: 0.58 },
   ])
 }

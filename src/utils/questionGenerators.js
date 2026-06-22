@@ -60,6 +60,8 @@ export function generateChordQuestion(level, previous = null) {
     const rootMidi = randomItem(possibleChordRoots(quality))
     const formula = chordFormulas[quality]
     const toneIndex = rule.identifyTone ? Math.floor(Math.random() * 3) : null
+    const targetTone = toneIndex === null ? null : rule.toneChoices[toneIndex]
+    const targetNote = toneIndex === null ? null : rootMidi + formula[toneIndex]
     question = {
       id: `${level}-${quality}-${rootMidi}-${toneIndex ?? 'quality'}-${Date.now()}`,
       level,
@@ -71,9 +73,11 @@ export function generateChordQuestion(level, previous = null) {
       notes: formula.map(interval => rootMidi + interval),
       playback: rule.playback,
       identifyTone: rule.identifyTone,
-      toneAnswer: toneIndex === null ? null : rule.toneChoices[toneIndex],
+      targetTone,
+      targetNote,
+      toneAnswer: targetTone,
       toneChoices: rule.toneChoices || [],
-      toneMidi: toneIndex === null ? null : rootMidi + formula[toneIndex],
+      toneMidi: targetNote,
     }
     const repeatedRoot = previous?.rootMidi === question.rootMidi
     const repeatedQuality = previous?.quality === question.quality

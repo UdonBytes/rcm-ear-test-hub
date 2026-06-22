@@ -54,7 +54,7 @@ export function Intervals({ level, onBack }) {
   return <QuizShell icon="🌈" title="Intervals" subtitle={`Level ${level}`} onBack={onBack}>
     <PlayButton onClick={() => playIntervalQuestion(question)} label="Play" />
     <p className="prompt">What interval did you hear?</p>
-    <Choices choices={question.choices} answer={question.answer} selected={selected} onChoose={choose} className="chord-choices" />
+    <Choices choices={question.choices} answer={question.answer} selected={selected} onChoose={choose} />
     <Feedback selected={selected} answer={question.answer} onNext={next} nextLabel="Next example" />
   </QuizShell>
 }
@@ -68,39 +68,34 @@ function SingleStepChord({ question, onNext }) {
     <PlayButton onClick={() => playChordQuality(question)} label="Play" />
     {question.playback === 'brokenThenSolid' && <p className="level-note">Listen for the separate notes, then the solid chord.</p>}
     <p className="prompt">Which chord did you hear?</p>
-    <Choices choices={question.choices} answer={question.answer} selected={selected} onChoose={choose} />
+    <Choices choices={question.choices} answer={question.answer} selected={selected} onChoose={choose} className="chord-choices" />
     <Feedback selected={selected} answer={question.answer} onNext={next} nextLabel="Next example" />
   </>
 }
 
 function TwoStepChord({ question, onNext }) {
-  const [stage, setStage] = useState('quality')
   const [qualitySelected, setQualitySelected] = useState(null)
   const [toneSelected, setToneSelected] = useState(null)
   useEffect(() => {
-    setStage('quality')
     setQualitySelected(null)
     setToneSelected(null)
   }, [question.id])
   const chooseQuality = choice => { stopAudio(); setQualitySelected(choice) }
   const chooseTone = choice => { stopAudio(); setToneSelected(choice) }
-  const continueToTone = () => { stopAudio(); setStage('tone') }
-  const next = () => { onNext(); setStage('quality'); setQualitySelected(null); setToneSelected(null) }
+  const next = () => { onNext(); setQualitySelected(null); setToneSelected(null) }
 
-  if (stage === 'quality') return <>
-    <div className="step-pill">Step 1 of 2 · Chord quality</div>
+  return <>
     <PlayButton onClick={() => playChordQuality(question)} label="Play" />
     <p className="prompt">Which chord did you hear?</p>
     <Choices choices={question.choices} answer={question.answer} selected={qualitySelected} onChoose={chooseQuality} className="chord-choices" />
-    <Feedback selected={qualitySelected} answer={question.answer} onNext={continueToTone} nextLabel="Continue" />
-  </>
-
-  return <>
-    <div className="step-pill">Step 2 of 2 · Chord tone</div>
-    <PlayButton onClick={() => playChordTone(question)} label="Play" />
-    <p className="prompt">Was the single note the root, third, or fifth?</p>
-    <Choices choices={question.toneChoices} answer={question.toneAnswer} selected={toneSelected} onChoose={chooseTone} />
-    <Feedback selected={toneSelected} answer={question.toneAnswer} onNext={next} nextLabel="Next example" />
+    <Feedback selected={qualitySelected} answer={question.answer} />
+    {qualitySelected && <section className="chord-tone-section">
+      <p className="tone-kicker">Now listen for one chord tone.</p>
+      <PlayButton onClick={() => playChordTone(question)} label="Play broken chord" />
+      <p className="prompt">Which chord tone did you hear?</p>
+      <Choices choices={question.toneChoices} answer={question.toneAnswer} selected={toneSelected} onChoose={chooseTone} className="chord-tone-choices" />
+      <Feedback selected={toneSelected} answer={question.toneAnswer} onNext={next} nextLabel="Next example" />
+    </section>}
   </>
 }
 
