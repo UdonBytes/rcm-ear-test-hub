@@ -33,8 +33,13 @@ export async function playApprovedAudio(path) {
 
 async function getContext() {
   audioContext ||= new (window.AudioContext || window.webkitAudioContext)()
-  if (audioContext.state === 'suspended') await audioContext.resume()
   return audioContext
+}
+
+async function getPlayableContext() {
+  const context = await getContext()
+  if (context.state === 'suspended') await context.resume()
+  return context
 }
 
 function midiToSampleName(midi) {
@@ -55,6 +60,20 @@ async function loadPianoSample(context, midi) {
   return sampleCache.get(sample)
 }
 
+export async function preloadPianoSamples(midiNotes) {
+  const context = await getContext()
+  const uniqueNotes = [...new Set(midiNotes.filter(note => Number.isFinite(note)))]
+  await Promise.all(uniqueNotes.map(note => loadPianoSample(context, note)))
+}
+
+export function getIntervalSampleMidis(question) {
+  return [question.startMidi, question.endMidi]
+}
+
+export function getChordSampleMidis(question) {
+  return [...question.notes, question.targetNote ?? question.toneMidi].filter(note => Number.isFinite(note))
+}
+
 async function scheduleNote(context, midi, startTime, duration, volume = 0.55) {
   const source = context.createBufferSource()
   const gain = context.createGain()
@@ -71,10 +90,10 @@ async function scheduleNote(context, midi, startTime, duration, volume = 0.55) {
 
 async function playEvents(events) {
   stopAudio()
-  const context = await getContext()
-  const start = context.currentTime + 0.08
+  const context = await getPlayableContext()
   const notes = [...new Set(events.flatMap(event => event.notes))]
   await Promise.all(notes.map(note => loadPianoSample(context, note)))
+  const start = context.currentTime + 0.08
   for (const event of events) {
     for (const note of event.notes) {
       scheduleNote(context, note, start + event.at, event.duration, event.volume)

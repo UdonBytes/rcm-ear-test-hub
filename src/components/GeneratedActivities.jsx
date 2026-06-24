@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import QuizShell, { Choices, Feedback, PlayButton } from './QuizShell'
 import { approvedExercises } from '../data/approvedExercises'
-import { playApprovedAudio, playChordQuality, playChordTone, playIntervalQuestion, stopAudio } from '../audio/audioController'
+import { getChordSampleMidis, getIntervalSampleMidis, playApprovedAudio, playChordQuality, playChordTone, playIntervalQuestion, preloadPianoSamples, stopAudio } from '../audio/audioController'
 import { generateChordQuestion, generateIntervalQuestion, shuffleQueue } from '../utils/questionGenerators'
 
 function useStopAudioOnUnmount() {
@@ -19,6 +19,23 @@ function useGeneratedQuestion(level, generator) {
     setQuestion(current => generator(level, current))
   }
   return { question, next }
+}
+
+function useSamplePreload(question, getSampleMidis) {
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    let active = true
+    setReady(false)
+    stopAudio()
+    preloadPianoSamples(getSampleMidis(question))
+      .then(() => { if (active) setReady(true) })
+      .catch(error => {
+        console.error('Could not preload piano samples', error)
+        if (active) setReady(false)
+      })
+    return () => { active = false }
+  }, [question, getSampleMidis])
+  return ready
 }
 
 function useApprovedQueue(level, bucket) {
@@ -48,24 +65,25 @@ function useApprovedQueue(level, bucket) {
 export function Intervals({ level, onBack }) {
   useStopAudioOnUnmount()
   const { question, next: nextQuestion } = useGeneratedQuestion(level, generateIntervalQuestion)
+  const audioReady = useSamplePreload(question, getIntervalSampleMidis)
   const [selected, setSelected] = useState(null)
   const choose = choice => { stopAudio(); setSelected(choice) }
   const next = () => { nextQuestion(); setSelected(null) }
   return <QuizShell icon="🌈" title="Intervals" subtitle={`Level ${level}`} onBack={onBack}>
-    <PlayButton onClick={() => playIntervalQuestion(question)} label="Play" />
+    <PlayButton onClick={() => playIntervalQuestion(question)} label={audioReady ? 'Play' : 'Loading…'} disabled={!audioReady} />
     <p className="prompt">What interval did you hear?</p>
     <Choices choices={question.choices} answer={question.answer} selected={selected} onChoose={choose} />
     <Feedback selected={selected} answer={question.answer} onNext={next} nextLabel="Next example" />
   </QuizShell>
 }
 
-function SingleStepChord({ question, onNext }) {
+function SingleStepChord({ question, onNext, audioReady }) {
   const [selected, setSelected] = useState(null)
   useEffect(() => setSelected(null), [question.id])
   const choose = choice => { stopAudio(); setSelected(choice) }
   const next = () => { onNext(); setSelected(null) }
   return <>
-    <PlayButton onClick={() => playChordQuality(question)} label="Play" />
+    <PlayButton onClick={() => playChordQuality(question)} label={audioReady ? 'Play' : 'Loading…'} disabled={!audioReady} />
     {question.playback === 'brokenThenSolid' && <p className="level-note">Listen for the separate notes, then the solid chord.</p>}
     <p className="prompt">Which chord did you hear?</p>
     <Choices choices={question.choices} answer={question.answer} selected={selected} onChoose={choose} className="chord-choices" />
@@ -73,7 +91,7 @@ function SingleStepChord({ question, onNext }) {
   </>
 }
 
-function TwoStepChord({ question, onNext }) {
+function TwoStepChord({ question, onNext, audioReady }) {
   const [qualitySelected, setQualitySelected] = useState(null)
   const [toneSelected, setToneSelected] = useState(null)
   useEffect(() => {
@@ -86,14 +104,14 @@ function TwoStepChord({ question, onNext }) {
 
   return <>
     <section className="chord-first-section">
-      <PlayButton onClick={() => playChordQuality(question)} label="Play" />
+      <PlayButton onClick={() => playChordQuality(question)} label={audioReady ? 'Play' : 'Loading…'} disabled={!audioReady} />
       <p className="prompt">Which chord did you hear?</p>
       <Choices choices={question.choices} answer={question.answer} selected={qualitySelected} onChoose={chooseQuality} className="chord-choices" />
     </section>
     <Feedback selected={qualitySelected} answer={question.answer} />
     {qualitySelected && <section className="chord-tone-section">
       <p className="tone-kicker">Now listen for one chord tone.</p>
-      <PlayButton onClick={() => playChordTone(question)} label="Play broken chord" />
+      <PlayButton onClick={() => playChordTone(question)} label={audioReady ? 'Play broken chord' : 'Loading…'} disabled={!audioReady} />
       <p className="prompt">Which chord tone did you hear?</p>
       <Choices choices={question.toneChoices} answer={question.toneAnswer} selected={toneSelected} onChoose={chooseTone} className="chord-tone-choices" />
       <Feedback selected={toneSelected} answer={question.toneAnswer} onNext={next} nextLabel="Next example" />
@@ -104,10 +122,11 @@ function TwoStepChord({ question, onNext }) {
 export function Chords({ level, onBack }) {
   useStopAudioOnUnmount()
   const { question, next } = useGeneratedQuestion(level, generateChordQuestion)
+  const audioReady = useSamplePreload(question, getChordSampleMidis)
   return <QuizShell icon="🎹" title="Chords" subtitle={`Level ${level}`} onBack={onBack}>
     {question.identifyTone
-      ? <TwoStepChord question={question} onNext={next} />
-      : <SingleStepChord question={question} onNext={next} />}
+      ? <TwoStepChord question={question} onNext={next} audioReady={audioReady} />
+      : <SingleStepChord question={question} onNext={next} audioReady={audioReady} />}
   </QuizShell>
 }
 

@@ -10,8 +10,8 @@ export default function QuizShell({ icon, title, subtitle, onBack, children }) {
   </main>
 }
 
-export function PlayButton({ onClick, label = 'Play sound' }) {
-  return <button className="play-button" onClick={onClick}><span>▶</span>{label}</button>
+export function PlayButton({ onClick, label = 'Play sound', disabled = false }) {
+  return <button className="play-button" onClick={onClick} disabled={disabled}><span>▶</span>{label}</button>
 }
 
 export function Choices({ choices, answer, selected, onChoose, className = '' }) {
